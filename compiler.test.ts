@@ -1,40 +1,59 @@
 import { lispToJs } from "./compiler";
 
-describe("Lisp to JavaScript Compiler", () => {
-  const testCases = [
-    {
-      lisp: "(+ 1 2)",
-      expectedJs: "(1 + 2)",
-    },
-    {
-      lisp: "(* 3 4)",
-      expectedJs: "(3 * 4)",
-    },
-    {
-      lisp: "(define x 10)",
-      expectedJs: "const x = 10;",
-    },
-    {
-      lisp: "(define (add x y) (+ x y))",
-      expectedJs: "function add(x, y) { return (x + y); }",
-    },
-    {
-      lisp: "(add 5 6)",
-      expectedJs: "add(5, 6)",
-    },
-    {
-      lisp: "(define (multiply a b) (* a b))",
-      expectedJs: "function multiply(a, b) { return (a * b); }",
-    },
-    {
-      lisp: "(multiply 2 8)",
-      expectedJs: "multiply(2, 8)",
-    },
-  ];
+const testCases = [
+  {
+    lisp: "(+ 1 2)",
+    expectedJs: "(1 + 2)",
+  },
+  {
+    lisp: "(* (+ 1 2) (- 4 3))",
+    expectedJs: "((1 + 2) * (4 - 3))",
+  },
+  {
+    lisp: "(define x 10)",
+    expectedJs: "const x = 10;",
+  },
+  {
+    lisp: "(define (add a b) (+ a b))",
+    expectedJs: "function add(a, b) { return (a + b); }",
+  },
+  {
+    lisp: "(add 10 20)",
+    expectedJs: "add(10, 20)",
+  },
+  {
+    lisp: "(define (sum a b) (+ a b)) (sum 10 20)",
+    expectedJs: "function sum(a, b) { return (a + b); } sum(10, 20)",
+  },
+  {
+    lisp: "(+)",
+    expectedJs: "0",
+  },
+  {
+    lisp: "(+ 1 2 (",
+    errorMessage: "Unexpected EOF",
+  },
+  {
+    lisp: "(+ 1 2 ())",
+    expectedJs: "(1 + 2)",
+  },
+  {
+    lisp: "(+ 1 # 2)",
+    errorMessage: "Unexpected token",
+  },
+];
 
-  testCases.forEach(({ lisp, expectedJs }, i) => {
-    test(`Test case ${i + 1}`, () => {
-      expect(lispToJs(lisp)).toEqual(expectedJs);
-    });
+testCases.forEach(({ lisp, expectedJs, errorMessage }, i) => {
+  test(`Test case ${i + 1}`, () => {
+    try {
+      const result = lispToJs(lisp);
+      expect(result).toEqual(expectedJs);
+    } catch (error: any) {
+      if (errorMessage) {
+        expect(error.message).toEqual(errorMessage);
+      } else {
+        throw error;
+      }
+    }
   });
 });

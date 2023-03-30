@@ -14,10 +14,16 @@ function readFromTokens(tokens: string[]): LispNode {
     throw new SyntaxError("Unexpected token");
   } else if (token === "(") {
     const list = [];
-    while (tokens[0] !== ")") {
+    while (tokens.length > 0) {
+      if (tokens[0] === ")") {
+        tokens.shift(); // Discard ')'
+        break;
+      }
       list.push(readFromTokens(tokens));
     }
-    tokens.shift(); // Discard ')'
+    if (tokens.length === 0 && list.length === 0) {
+      throw new SyntaxError("Expected )");
+    }
     return list;
   } else if (token === ")") {
     throw new SyntaxError("Unexpected )");
@@ -27,6 +33,10 @@ function readFromTokens(tokens: string[]): LispNode {
 }
 
 function atom(token: string): LispNode {
+  if (token.match(/[^a-zA-Z0-9_+\-*/]/)) {
+    throw new SyntaxError("Unexpected token");
+  }
+
   const number = Number(token);
   if (isNaN(number)) {
     return token;
@@ -49,9 +59,17 @@ export function compile(node: LispNode): string {
     const [head, ...tail] = node;
     switch (head) {
       case "+":
+        if (tail.length === 0) {
+          return "0";
+        } else {
+          return `(${tail.map(compile).join(" + ")})`;
+        }
       case "-":
       case "*":
       case "/":
+        if (tail.length === 0) {
+          throw new SyntaxError(`Expected at least one operand for ${head}`);
+        }
         return `(${tail.map(compile).join(` ${head} `)})`;
       case "define":
         if (Array.isArray(tail[0])) {
