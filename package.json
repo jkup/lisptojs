@@ -16,5 +16,11 @@
   "bugs": {
     "url": "https://github.com/jkup/lisptojs/issues"
   },
-  "homepage": "https://github.com/jkup/lisptojs#readme"
+  "homepage": "https://github.com/jkup/lisptojs#readme",
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.0.5",
+    "typescript": "^5.0.3"
+  }
 }
