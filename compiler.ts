@@ -1,7 +1,43 @@
 type LispNode = number | string | Array<LispNode>;
 
-export function parse(code: string): LispNode {
-  return JSON.parse(code.replace(/\(/g, "[").replace(/\)/g, "]"));
+function tokenize(code: string): string[] {
+  return code.replace(/\(/g, " ( ").replace(/\)/g, " ) ").trim().split(/\s+/);
+}
+
+function readFromTokens(tokens: string[]): LispNode {
+  if (tokens.length === 0) {
+    throw new SyntaxError("Unexpected EOF");
+  }
+
+  const token = tokens.shift();
+  if (token === undefined) {
+    throw new SyntaxError("Unexpected token");
+  } else if (token === "(") {
+    const list = [];
+    while (tokens[0] !== ")") {
+      list.push(readFromTokens(tokens));
+    }
+    tokens.shift(); // Discard ')'
+    return list;
+  } else if (token === ")") {
+    throw new SyntaxError("Unexpected )");
+  } else {
+    return atom(token);
+  }
+}
+
+function atom(token: string): LispNode {
+  const number = Number(token);
+  if (isNaN(number)) {
+    return token;
+  } else {
+    return number;
+  }
+}
+
+function parse(code: string): LispNode {
+  const tokens = tokenize(code);
+  return readFromTokens(tokens);
 }
 
 export function compile(node: LispNode): string {
