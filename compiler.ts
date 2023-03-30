@@ -32,9 +32,7 @@ export function compile(node: LispNode): string {
   }
 }
 
-/* Usage example
 export function lispToJs(code: string): string {
   const lispAst = parse(code);
   return compile(lispAst);
 }
-*/
